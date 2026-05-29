@@ -144,7 +144,7 @@ fileInput.addEventListener('change', function(e) {
       ctx.drawImage(hiddenUser, dx, dy, dw, dh);
       ctx.restore();
 
-     // 2. overlay - 화면 영역 제외하고 그리기
+      // 2. overlay - 화면 영역(SCREEN) 제외하고 그리기 (evenodd clip)
       ctx.save();
       ctx.beginPath();
       ctx.rect(0, 0, OW, OH);

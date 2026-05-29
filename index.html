@@ -173,20 +173,19 @@ fileInput.addEventListener('change', function(e) {
 
       let dw, dh, dx, dy;
 
-      // contain 방식
-      // 사진 전체가 최대한 보이도록 맞춤
-
+      // cover 방식: FS 영역을 꽉 채우고 넘치는 부분은 clip으로 자름
       if (pa > fa) {
-        dw = FS.w;
-        dh = dw / pa;
-        dx = FS.x;
-        dy = FS.y + (FS.h - dh) / 2;
-      }
-      else {
+        // 사진이 FS보다 가로가 넓음 → 세로 맞춤, 가로 crop
         dh = FS.h;
         dw = dh * pa;
         dx = FS.x + (FS.w - dw) / 2;
         dy = FS.y;
+      } else {
+        // 사진이 FS보다 세로가 긺 → 가로 맞춤, 세로 crop
+        dw = FS.w;
+        dh = dw / pa;
+        dx = FS.x;
+        dy = FS.y + (FS.h - dh) / 2;
       }
       ctx.save();
       ctx.beginPath();

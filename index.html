@@ -168,11 +168,26 @@ fileInput.addEventListener('change', function(e) {
 
       // 2. 사용자 사진을 FS 영역에 클리핑 후 cover fit으로 그리기
       // (클리핑 없으면 세로 긴 사진이 주머니 아래로 삐져나옴)
-      const pa = hiddenUser.naturalWidth / hiddenUser.naturalHeight;
+     const pa = hiddenUser.naturalWidth / hiddenUser.naturalHeight;
       const fa = FS.w / FS.h;
+
       let dw, dh, dx, dy;
-      if (pa > fa) { dh = FS.h; dw = dh*pa; dx = FS.x + FS.w/2 - dw/2; dy = FS.y; }
-      else { dw = FS.w; dh = dw/pa; dx = FS.x; dy = FS.y + FS.h/2 - dh/2; }
+
+      // contain 방식
+      // 사진 전체가 최대한 보이도록 맞춤
+
+      if (pa > fa) {
+        dw = FS.w;
+        dh = dw / pa;
+        dx = FS.x;
+        dy = FS.y + (FS.h - dh) / 2;
+      }
+      else {
+        dh = FS.h;
+        dw = dh * pa;
+        dx = FS.x + (FS.w - dw) / 2;
+        dy = FS.y;
+      }
       ctx.save();
       ctx.beginPath();
       ctx.rect(FS.x, FS.y, FS.w, FS.h);

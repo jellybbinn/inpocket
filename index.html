@@ -120,8 +120,13 @@ fileInput.addEventListener('change', function(e) {
       canvas.height = OH;
       const ctx = canvas.getContext('2d');
 
-      // 폰 전체 화면 영역 (손/주머니로 가려지는 부분 포함)
+      // 업로드 이미지가 들어갈 전체 좌표값
+      // x, y = 위치 / w, h = 크기
       const FS = {x:352, y:428, w:226, h:462};
+
+      // 실제로 투명 처리할 화면 영역
+      // 주머니 쪽은 투명 처리하지 않아서 이미지가 뒤로 들어가 보이게 함
+      const CUT = {x:352, y:428, w:226, h:318};
 
       // 1. 오버레이를 임시 캔버스에 그린 뒤 화면 영역 색상을 픽셀 키잉으로 투명화
       const tmp = document.createElement('canvas');
@@ -137,8 +142,8 @@ fileInput.addEventListener('change', function(e) {
       const idata = tc.getImageData(0, 0, OW, OH);
       const px = idata.data;
       const thr = 30;
-      for (let y = FS.y; y < FS.y + FS.h; y++) {
-        for (let x = FS.x; x < FS.x + FS.w; x++) {
+     for (let y = CUT.y; y < CUT.y + CUT.h; y++) {
+        for (let x = CUT.x; x < CUT.x + CUT.w; x++) {
           const i = (y * OW + x) * 4;
           if (Math.abs(px[i]-kR) < thr && Math.abs(px[i+1]-kG) < thr && Math.abs(px[i+2]-kB) < thr) {
             px[i+3] = 0;

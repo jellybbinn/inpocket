@@ -147,13 +147,19 @@ fileInput.addEventListener('change', function(e) {
       }
       tc.putImageData(idata, 0, 0);
 
-      // 2. 사용자 사진을 폰 전체 화면 영역에 cover fit으로 그리기
+      // 2. 사용자 사진을 FS 영역에 클리핑 후 cover fit으로 그리기
+      // (클리핑 없으면 세로 긴 사진이 주머니 아래로 삐져나옴)
       const pa = hiddenUser.naturalWidth / hiddenUser.naturalHeight;
       const fa = FS.w / FS.h;
       let dw, dh, dx, dy;
       if (pa > fa) { dh = FS.h; dw = dh*pa; dx = FS.x + FS.w/2 - dw/2; dy = FS.y; }
       else { dw = FS.w; dh = dw/pa; dx = FS.x; dy = FS.y + FS.h/2 - dh/2; }
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(FS.x, FS.y, FS.w, FS.h);
+      ctx.clip();
       ctx.drawImage(hiddenUser, dx, dy, dw, dh);
+      ctx.restore();
 
       // 3. 처리된 오버레이를 위에 덮기 (프레임/손/주머니가 사진 위에 자연스럽게 올라옴)
       ctx.drawImage(tmp, 0, 0);

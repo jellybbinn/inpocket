@@ -148,12 +148,28 @@ fileInput.addEventListener('change', function(e) {
         dw = FS.w; dh = dw / pa;
         dx = FS.x; dy = FS.y + (FS.h - dh) / 2;
       }
-      ctx.save();
-      ctx.beginPath();
-      ctx.rect(FS.x, FS.y, FS.w, FS.h);
-      ctx.clip();
-      ctx.drawImage(hiddenUser, dx, dy, dw, dh);
-      ctx.restore();
+      // 임시 캔버스에 사용자 사진 그린 뒤 채도 낮추기
+      const tmp = document.createElement('canvas');
+      tmp.width = OW; tmp.height = OH;
+      const tc = tmp.getContext('2d');
+      tc.save();
+      tc.beginPath();
+      tc.rect(FS.x, FS.y, FS.w, FS.h);
+      tc.clip();
+      tc.drawImage(hiddenUser, dx, dy, dw, dh);
+      tc.restore();
+
+      const id = tc.getImageData(FS.x, FS.y, FS.w, FS.h);
+      const px = id.data;
+      const sat = 0.55; // 채도 비율 (0=흑백, 1=원본)
+      for (let i = 0; i < px.length; i += 4) {
+        const gray = px[i]*0.299 + px[i+1]*0.587 + px[i+2]*0.114;
+        px[i]   = gray + (px[i]   - gray) * sat;
+        px[i+1] = gray + (px[i+1] - gray) * sat;
+        px[i+2] = gray + (px[i+2] - gray) * sat;
+      }
+      tc.putImageData(id, FS.x, FS.y);
+      ctx.drawImage(tmp, 0, 0);
 
       // 2. 상단_뷰 PNG를 그대로 위에 덮기 (알파채널로 화면 영역이 자연스럽게 뚫림)
       ctx.drawImage(hiddenOverlay, 0, 0, OW, OH);

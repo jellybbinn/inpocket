@@ -161,7 +161,7 @@ fileInput.addEventListener('change', function(e) {
 
       const id = tc.getImageData(FS.x, FS.y, FS.w, FS.h);
       const px = id.data;
-      const sat = 0.55; // 채도 비율 (0=흑백, 1=원본)
+      const sat = 0.75; // 채도 비율 (0=흑백, 1=원본)
       for (let i = 0; i < px.length; i += 4) {
         const gray = px[i]*0.299 + px[i+1]*0.587 + px[i+2]*0.114;
         px[i]   = gray + (px[i]   - gray) * sat;

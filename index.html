@@ -134,58 +134,19 @@ fileInput.addEventListener('change', function(e) {
       canvas.height = OH;
       const ctx = canvas.getContext('2d');
 
-    // 업로드 이미지가 실제로 들어가는 전체 영역
-    // 세로값을 길게 잡아서 사진이 주머니 안쪽까지 이어지게 함
+      // 사용자 사진이 들어가는 전체 화면 영역
       const FS = {x:352, y:428, w:226, h:560};
 
-    // 실제로 투명 처리해서 화면처럼 보이게 할 영역
-    // 주머니 입구 아래쪽은 뚫지 않음
-      const CUT = {x:352, y:428, w:226, h:318};
-
-      // 1. 오버레이를 임시 캔버스에 그린 뒤 화면 영역 색상을 픽셀 키잉으로 투명화
-      const tmp = document.createElement('canvas');
-      tmp.width = OW; tmp.height = OH;
-      const tc = tmp.getContext('2d');
-      tc.drawImage(hiddenOverlay, 0, 0, OW, OH);
-
-      // 화면 중앙 상단 픽셀로 키 색상 자동 감지 (손이 없는 안전 영역)
-      const kp = tc.getImageData(Math.round(FS.x + FS.w * 0.5), Math.round(FS.y + FS.h * 0.15), 1, 1).data;
-      const [kR, kG, kB] = [kp[0], kp[1], kp[2]];
-
-      // FS 영역 내에서만 키 색상과 유사한 픽셀을 투명 처리
-      const idata = tc.getImageData(0, 0, OW, OH);
-      const px = idata.data;
-      const thr = 30;
-     for (let y = CUT.y; y < CUT.y + CUT.h; y++) {
-        for (let x = CUT.x; x < CUT.x + CUT.w; x++) {
-          const i = (y * OW + x) * 4;
-          if (Math.abs(px[i]-kR) < thr && Math.abs(px[i+1]-kG) < thr && Math.abs(px[i+2]-kB) < thr) {
-            px[i+3] = 0;
-          }
-        }
-      }
-      tc.putImageData(idata, 0, 0);
-
-      // 2. 사용자 사진을 FS 영역에 클리핑 후 cover fit으로 그리기
-      // (클리핑 없으면 세로 긴 사진이 주머니 아래로 삐져나옴)
-     const pa = hiddenUser.naturalWidth / hiddenUser.naturalHeight;
+      // 1. 사용자 사진을 FS 영역에 cover fit으로 그리기
+      const pa = hiddenUser.naturalWidth / hiddenUser.naturalHeight;
       const fa = FS.w / FS.h;
-
       let dw, dh, dx, dy;
-
-      // cover 방식: FS 영역을 꽉 채우고 넘치는 부분은 clip으로 자름
       if (pa > fa) {
-        // 사진이 FS보다 가로가 넓음 → 세로 맞춤, 가로 crop
-        dh = FS.h;
-        dw = dh * pa;
-        dx = FS.x + (FS.w - dw) / 2;
-        dy = FS.y;
+        dh = FS.h; dw = dh * pa;
+        dx = FS.x + (FS.w - dw) / 2; dy = FS.y;
       } else {
-        // 사진이 FS보다 세로가 긺 → 가로 맞춤, 세로 crop
-        dw = FS.w;
-        dh = dw / pa;
-        dx = FS.x;
-        dy = FS.y + (FS.h - dh) / 2;
+        dw = FS.w; dh = dw / pa;
+        dx = FS.x; dy = FS.y + (FS.h - dh) / 2;
       }
       ctx.save();
       ctx.beginPath();
@@ -194,18 +155,9 @@ fileInput.addEventListener('change', function(e) {
       ctx.drawImage(hiddenUser, dx, dy, dw, dh);
       ctx.restore();
 
-      // 3. 처리된 오버레이를 위에 덮기 (프레임/손/주머니가 사진 위에 자연스럽게 올라옴)
-      ctx.drawImage(tmp, 0, 0);
+      // 2. 상단_뷰 PNG를 그대로 위에 덮기 (알파채널로 화면 영역이 자연스럽게 뚫림)
+      ctx.drawImage(hiddenOverlay, 0, 0, OW, OH);
 
-      // 4. 다이내믹 아일랜드 복원 (투명 처리로 사라진 부분을 검정 pill로 다시 그림)
-      const diCX = SCREEN.x + SCREEN.w / 2; // 화면 가로 중앙
-      const diW = 80, diH = 26, diR = 13;
-      const diX = diCX - diW / 2;
-      const diY = SCREEN.y + 10;
-      ctx.fillStyle = '#000000';
-      ctx.beginPath();
-      ctx.roundRect(diX, diY, diW, diH, diR);
-      ctx.fill();
 
       const dataURL = canvas.toDataURL('image/png');
       resultImg.src = dataURL;

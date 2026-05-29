@@ -197,6 +197,16 @@ fileInput.addEventListener('change', function(e) {
       // 3. 처리된 오버레이를 위에 덮기 (프레임/손/주머니가 사진 위에 자연스럽게 올라옴)
       ctx.drawImage(tmp, 0, 0);
 
+      // 4. 다이내믹 아일랜드 복원 (투명 처리로 사라진 부분을 검정 pill로 다시 그림)
+      const diCX = SCREEN.x + SCREEN.w / 2; // 화면 가로 중앙
+      const diW = 80, diH = 26, diR = 13;
+      const diX = diCX - diW / 2;
+      const diY = SCREEN.y + 10;
+      ctx.fillStyle = '#000000';
+      ctx.beginPath();
+      ctx.roundRect(diX, diY, diW, diH, diR);
+      ctx.fill();
+
       const dataURL = canvas.toDataURL('image/png');
       resultImg.src = dataURL;
       resultImg.style.display = 'block';
